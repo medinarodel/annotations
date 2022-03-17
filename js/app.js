@@ -95,7 +95,7 @@ window.onload = function () {
   });
 
   /**
-   * REDO
+   * DUPLICATE
    * required: currentSelection present
    */
   var duplicateBtn = document.getElementById("duplicate");
@@ -111,6 +111,20 @@ window.onload = function () {
       selected = anno.getAnnotationById(newAnnotation.id);
       currentSelection = selected;
       anno.selectAnnotation(currentSelection);
+
+      historyLog(anno.getAnnotations());
+    }
+  });
+
+  /**
+   * REMOVE
+   * required: currentSelection present
+   */
+  var removeBtn = document.getElementById("remove");
+  removeBtn.addEventListener("click", async () => {
+    if (currentSelection) {
+      anno.removeAnnotation(currentSelection);
+      anno.cancelSelected();
 
       historyLog(anno.getAnnotations());
     }
@@ -160,7 +174,7 @@ window.onload = function () {
   document.addEventListener("mousedown", () => (drag = false));
   document.addEventListener("mousemove", () => (drag = true));
   document.addEventListener("mouseup", async () => {
-    if (drag) {
+    if (drag && currentSelection) {
       const outerElement = document.querySelectorAll(
         `[data-id="${currentSelection.id}"]  .a9s-outer`
       )[0];
