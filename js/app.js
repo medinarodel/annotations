@@ -159,9 +159,30 @@ window.onload = function () {
   document.addEventListener("mousemove", () => (drag = true));
   document.addEventListener("mouseup", async () => {
     if (drag) {
-      await anno.updateSelected(currentSelection, true);
+      const outerElement = document.querySelectorAll(
+        `[data-id="${currentSelection.id}"]  .a9s-outer`
+      )[0];
 
-      selected = anno.getAnnotationById(currentSelection.id);
+      if (!outerElement) {
+        console.log("outerElement not found", currentSelection.id);
+        return;
+      }
+
+      const attr = outerElement.attributes;
+
+      const value = `xywh=pixel:${attr.x.value},${attr.y.value},${attr.width.value},${attr.height.value}`;
+
+      const newSelection = {
+        ...currentSelection,
+        target: {
+          ...currentSelection.target,
+          selector: { ...currentSelection.target.selector, value },
+        },
+      };
+
+      await anno.updateSelected(newSelection, true);
+
+      selected = anno.getAnnotationById(newSelection.id);
       currentSelection = selected;
       anno.selectAnnotation(currentSelection);
 
