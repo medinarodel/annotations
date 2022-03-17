@@ -1,0 +1,26 @@
+html,
+body {
+  padding: 20px;
+  margin: 0px;
+  font-family: "Lato", sans-serif;
+}
+
+.toolbar {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 10px;
+}
+
+img {
+  max-width: 100%;
+}
+
+#openseadragon1 {
+  height: 75vh;
+  width: 75vw;
+  margin: 20px auto;
+}
+
+#openseadragon1 .openseadragon-container {
+  outline: none;
+}
