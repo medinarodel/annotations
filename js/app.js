@@ -5,8 +5,8 @@ window.onload = function () {
 
   historyLog = function (annos) {
     annotations.push(annos);
-    currentHistoryIndex = annos.length - 1;
-    console.log("historyLog", currentHistoryIndex, annos.length, annos);
+    currentHistoryIndex = annotations.length - 1;
+    console.log("historyLog", annotations);
   };
 
   var viewer = OpenSeadragon({
@@ -62,7 +62,7 @@ window.onload = function () {
 
   anno.on("updateAnnotation", function (annotation, previous) {
     console.log("updated", previous, "with", annotation);
-    historyLog(anno.getAnnotations());
+    // historyLog(anno.getAnnotations());
   });
 
   anno.on("mouseEnterAnnotation", function (a) {
@@ -127,8 +127,10 @@ window.onload = function () {
 
     currentHistoryIndex = currentHistoryIndex - 1;
     if (currentHistoryIndex < 0) {
+      console.log("currentHistoryIndex=0");
       anno.setAnnotations([]);
     } else {
+      console.log("currentHistoryIndex", currentHistoryIndex);
       anno.setAnnotations(annotations[currentHistoryIndex]);
     }
 
