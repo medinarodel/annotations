@@ -5,8 +5,8 @@ window.onload = function () {
 
   historyLog = function (annos) {
     annotations.push(annos);
-    currentHistoryIndex = annos.length - 1;
-    console.log("historyLog", currentHistoryIndex, annos.length, annos);
+    currentHistoryIndex = annotations.length - 1;
+    console.log("historyLog", annotations);
   };
 
   var viewer = OpenSeadragon({
@@ -62,7 +62,7 @@ window.onload = function () {
 
   anno.on("updateAnnotation", function (annotation, previous) {
     console.log("updated", previous, "with", annotation);
-    historyLog(anno.getAnnotations());
+    // historyLog(anno.getAnnotations());
   });
 
   anno.on("mouseEnterAnnotation", function (a) {
@@ -95,7 +95,7 @@ window.onload = function () {
   });
 
   /**
-   * REDO
+   * DUPLICATE
    * required: currentSelection present
    */
   var duplicateBtn = document.getElementById("duplicate");
@@ -117,6 +117,20 @@ window.onload = function () {
   });
 
   /**
+   * REMOVE
+   * required: currentSelection present
+   */
+  var removeBtn = document.getElementById("remove");
+  removeBtn.addEventListener("click", async () => {
+    if (currentSelection) {
+      anno.removeAnnotation(currentSelection);
+      anno.cancelSelected();
+
+      historyLog(anno.getAnnotations());
+    }
+  });
+
+  /**
    * UNDO
    */
   var undoBtn = document.getElementById("undo");
@@ -127,8 +141,10 @@ window.onload = function () {
 
     currentHistoryIndex = currentHistoryIndex - 1;
     if (currentHistoryIndex < 0) {
+      console.log("currentHistoryIndex=0");
       anno.setAnnotations([]);
     } else {
+      console.log("currentHistoryIndex", currentHistoryIndex);
       anno.setAnnotations(annotations[currentHistoryIndex]);
     }
 
@@ -158,7 +174,7 @@ window.onload = function () {
   document.addEventListener("mousedown", () => (drag = false));
   document.addEventListener("mousemove", () => (drag = true));
   document.addEventListener("mouseup", async () => {
-    if (drag) {
+    if (drag && currentSelection) {
       const outerElement = document.querySelectorAll(
         `[data-id="${currentSelection.id}"]  .a9s-outer`
       )[0];
