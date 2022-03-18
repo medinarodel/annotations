@@ -13,7 +13,7 @@ window.onload = function () {
 
   historyLog = function (annotation) {
     annotations.push(annotation);
-    currentHistoryIndex = annotations.length - 1;
+    currentHistoryIndex = annotations.length;
 
     console.log("historyLog", annotations);
   };
@@ -180,24 +180,19 @@ window.onload = function () {
         return;
       }
 
-      if (
-        prevAction.action === REMOVE_ACTION ||
-        prevAction.action === MOVE_ACTION
-      ) {
+      if (prevAction.action === REMOVE_ACTION) {
         let prevAnnotation = prevAction.annotation;
-        const newAnnotation = {
-          ...prevAnnotation,
-          id: uuid.v4(),
-          type: "Annotation",
-        };
-        anno.removeAnnotation(prevAnnotation);
-        anno.cancelSelected();
-        anno.addAnnotation(newAnnotation);
-        await anno.updateSelected(prevAnnotation, true);
 
-        selected = anno.getAnnotationById(newAnnotation.id);
-        prevAnnotation = selected;
-        anno.selectAnnotation(prevAnnotation);
+        anno.addAnnotation(prevAnnotation);
+        await anno.updateSelected(prevAnnotation, true);
+      }
+
+      if (prevAction.action === MOVE_ACTION) {
+        anno.removeAnnotation(prevAction.annotation);
+        anno.cancelSelected();
+
+        anno.addAnnotation(prevAction.oldAnnotation);
+        await anno.updateSelected(prevAction.oldAnnotation, true);
       }
     }
 
@@ -213,38 +208,33 @@ window.onload = function () {
       return;
     }
 
-    currentHistoryIndex = currentHistoryIndex + 1;
-    const prevAction = annotations[currentHistoryIndex];
+    const nextAction = annotations[currentHistoryIndex];
 
-    if (prevAction) {
-      if (prevAction.action === REMOVE_ACTION) {
-        anno.removeAnnotation(prevAction.annotation);
+    console.log(nextAction, currentHistoryIndex);
+    if (nextAction) {
+      if (nextAction.action === CREATE_ACTION) {
+        let nextAnnotation = nextAction.annotation;
+
+        anno.addAnnotation(nextAnnotation);
+        await anno.updateSelected(nextAnnotation, true);
+      }
+
+      if (nextAction.action === REMOVE_ACTION) {
+        anno.removeAnnotation(nextAction.annotation);
         anno.cancelSelected();
         return;
       }
 
-      if (
-        prevAction.action === CREATE_ACTION ||
-        prevAction.action === MOVE_ACTION
-      ) {
-        let prevAnnotation = prevAction.annotation;
-        const newAnnotation = {
-          ...prevAnnotation,
-          id: uuid.v4(),
-          type: "Annotation",
-        };
-        anno.removeAnnotation(prevAnnotation);
+      if (nextAction.action === MOVE_ACTION) {
+        anno.removeAnnotation(nextAction.oldAnnotation);
         anno.cancelSelected();
-        anno.addAnnotation(newAnnotation);
-        await anno.updateSelected(prevAnnotation, true);
 
-        selected = anno.getAnnotationById(newAnnotation.id);
-        prevAnnotation = selected;
-        anno.selectAnnotation(prevAnnotation);
+        anno.addAnnotation(nextAction.annotation);
+        await anno.updateSelected(nextAction.annotation, true);
       }
     }
 
-    anno.setDrawingEnabled(false);
+    currentHistoryIndex = currentHistoryIndex + 1;
   });
 
   /**
@@ -279,14 +269,15 @@ window.onload = function () {
 
       await anno.updateSelected(newSelection, true);
 
+      historyLog({
+        action: MOVE_ACTION,
+        annotation: newSelection,
+        oldAnnotation: currentSelection,
+      });
+
       selected = anno.getAnnotationById(newSelection.id);
       currentSelection = selected;
       anno.selectAnnotation(currentSelection);
-
-      historyLog({
-        action: MOVE_ACTION,
-        annotation: currentSelection,
-      });
     }
   });
 };
