@@ -24,3 +24,14 @@ img {
 #openseadragon1 .openseadragon-container {
   outline: none;
 }
+
+/** New style for the annotation outlines **/
+svg.a9s-annotationlayer .a9s-selection.red .a9s-inner,
+svg.a9s-annotationlayer .a9s-annotation.red .a9s-inner {
+  stroke: red;
+}
+
+svg.a9s-annotationlayer .a9s-selection.blue .a9s-inner,
+svg.a9s-annotationlayer .a9s-annotation.blue .a9s-inner {
+  stroke: blue;
+}
