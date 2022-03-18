@@ -1,12 +1,20 @@
 window.onload = function () {
+  const RED_ANNOTATION = "red";
+  const BLUE_ANNOTATION = "blue";
+
   var currentSelection;
   var annotations = [];
   var currentHistoryIndex = null;
+  var annotationType = null;
 
   historyLog = function (annos) {
     annotations.push(annos);
     currentHistoryIndex = annotations.length - 1;
     console.log("historyLog", annotations);
+  };
+
+  formatter = function (selection) {
+    return selection.bodies[0]?.type;
   };
 
   var viewer = OpenSeadragon({
@@ -24,6 +32,8 @@ window.onload = function () {
   var config = {
     locale: "auto",
     disableEditor: true,
+    allowEmpty: true,
+    formatter: formatter,
   };
 
   // Initialize the Annotorious plugin
@@ -32,14 +42,13 @@ window.onload = function () {
   anno.on("createSelection", async function (selection) {
     selection.body = [
       {
-        type: "TextualBody",
+        type: annotationType,
         purpose: "tagging",
         value: "MyOtherTag",
       },
     ];
 
-    await anno.updateSelected(selection);
-    anno.saveSelected();
+    await anno.updateSelected(selection, true);
 
     anno.setDrawingEnabled(true);
     anno.setDrawingTool("rect");
@@ -62,7 +71,6 @@ window.onload = function () {
 
   anno.on("updateAnnotation", function (annotation, previous) {
     console.log("updated", previous, "with", annotation);
-    // historyLog(anno.getAnnotations());
   });
 
   anno.on("mouseEnterAnnotation", function (a) {
@@ -80,8 +88,16 @@ window.onload = function () {
   /**
    * DRAW
    */
-  var drawBtn = document.getElementById("draw");
-  drawBtn.addEventListener("click", function () {
+  var redDrawBtn = document.getElementById("red-draw");
+  redDrawBtn.addEventListener("click", function () {
+    annotationType = RED_ANNOTATION;
+    anno.setDrawingEnabled(true);
+    anno.setDrawingTool("rect");
+  });
+
+  var blueDrawBtn = document.getElementById("blue-draw");
+  blueDrawBtn.addEventListener("click", function () {
+    annotationType = BLUE_ANNOTATION;
     anno.setDrawingEnabled(true);
     anno.setDrawingTool("rect");
   });
@@ -108,6 +124,7 @@ window.onload = function () {
       };
       anno.addAnnotation(newAnnotation);
       await anno.updateSelected(currentSelection, true);
+
       selected = anno.getAnnotationById(newAnnotation.id);
       currentSelection = selected;
       anno.selectAnnotation(currentSelection);
